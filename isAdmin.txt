@@ -1,0 +1,64 @@
+if(iAdminService.isAdmin(emailId, encryptedPassword)!=null)
+		{
+			/*model.addAttribute("details",iAdminService.isAdmin(emailId, encryptedPassword));*/
+			session.setAttribute("userId",iAdminService.isAdmin(emailId, encryptedPassword).getAdminId());
+			session.setAttribute("user","admin");
+			return "redirect:adminPage.html";
+		}
+		else if(iMerchantService.isMerchant(emailId, encryptedPassword)!=null)
+		{
+			/*model.addAttribute("details",iMerchantService.isMerchant(emailId, encryptedPassword));*/
+			session.setAttribute("userId",iMerchantService.isMerchant(emailId, encryptedPassword).getMerchantId());
+			session.setAttribute("user", "merchant");
+			return "redirect:merchantPage.html";
+		}
+		else if(iCustomerService.isCustomer(emailId, encryptedPassword)!=null)
+		{	
+			int custId=iCustomerService.getIdFromEmail(emailId);
+			System.out.println("Cust id is"+custId);
+			session.setAttribute("custId",custId);
+			//model.addAttribute("details",iCustomerService.isCustomer(emailId, encryptedPassword));
+			//System.out.println(iCustomerService.isCustomer(emailId, password).getCustomerId());
+			session.setAttribute("userId",iCustomerService.isCustomer(emailId, encryptedPassword).getCustomerId());
+			session.setAttribute("user", "customer");
+			/*model.addAttribute("customerName",iCustomerService.isCustomer(emailId, encryptedPassword).getCustomerName());
+			model.addAttribute("inventory", iMerchantService.getAllInventory());
+			model.addAttribute("size",iMerchantService.getAllInventory().size());
+			model.addAttribute("inventoryTypes", inventoryTypes);*/
+			return "redirect:customerPage.html";
+		}
+		else {
+			model.addAttribute("error", "invalid username or password");
+			return "loginpage";
+		}
+			
+		/*return "decidor";*/
+	}
+	
+	@RequestMapping("/adminPage")
+	public String adminPageRedirect(Model model)
+	{
+		int adminId=(int)session.getAttribute("userId");
+		
+		model.addAttribute("details",iAdminService.find(adminId));
+		 return "adminPage";
+	}
+	@RequestMapping("/merchantPage")
+	public String merchantPageredirect(Model model)
+	{
+		int merchantId=(int)session.getAttribute("userId");
+		
+		model.addAttribute("details",iMerchantService.showDetails(merchantId));
+		 return "merchantPage";
+	}
+	
+	@RequestMapping("/customerPage")
+	public String customerPageredirect(Model model)
+	{
+		int customerId=(int)session.getAttribute("userId");
+		model.addAttribute("customerName",iCustomerService.find(customerId).getCustomerName());
+		model.addAttribute("inventory", iMerchantService.getAllInventory());
+		model.addAttribute("size",iMerchantService.getAllInventory().size());
+		model.addAttribute("inventoryTypes", inventoryTypes);
+		 return "customerPage";
+	}
